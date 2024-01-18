@@ -5,7 +5,11 @@ const stylesPath = path.join(__dirname, 'styles');
 const bundleFolderPath = path.join(__dirname, 'project-dist');
 const bundleFilePath = path.join(bundleFolderPath, 'bundle.css');
 
-fs.writeFileSync(bundleFilePath, '');
+fs.writeFile(bundleFilePath, '', (err) => {
+  if (err) {
+    return console.error('Ошибка при обнулении файла');
+  }
+});
 
 fs.readdir(stylesPath, { withFileTypes: true }, (err, files) => {
   if (err) {
@@ -14,15 +18,19 @@ fs.readdir(stylesPath, { withFileTypes: true }, (err, files) => {
 
   const writeStream = fs.createWriteStream(bundleFilePath, { flags: 'as' });
 
-  files.forEach((file) => {
+  files.forEach((file, index) => {
     if (path.extname(file.name) === '.css' && file.isFile()) {
       const filePath = path.join(stylesPath, file.name);
-      fs.readFile(filePath, 'utf-8', (err, data) => {
-        if (err) {
-          return console.error('Ошибка при чтении файла');
-        }
+      const readStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
 
-        writeStream.write(data + '\n');
+      readStream.on('data', (chunk) => {
+        writeStream.write(chunk);
+      });
+
+      readStream.on('end', () => {
+        if (index === files.length - 1) {
+          writeStream.end();
+        }
       });
     }
   });
