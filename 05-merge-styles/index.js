@@ -5,18 +5,12 @@ const stylesPath = path.join(__dirname, 'styles');
 const bundleFolderPath = path.join(__dirname, 'project-dist');
 const bundleFilePath = path.join(bundleFolderPath, 'bundle.css');
 
-fs.writeFile(bundleFilePath, '', (err) => {
-  if (err) {
-    return console.error('Ошибка при обнулении файла');
-  }
-});
-
 fs.readdir(stylesPath, { withFileTypes: true }, (err, files) => {
   if (err) {
     return console.error('Ошибка при чтении папки');
   }
 
-  const writeStream = fs.createWriteStream(bundleFilePath, { flags: 'as' });
+  const writeStream = fs.createWriteStream(bundleFilePath);
 
   files.forEach((file, index) => {
     if (path.extname(file.name) === '.css' && file.isFile()) {
